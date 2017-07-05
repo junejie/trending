@@ -21,4 +21,4 @@ class GithubSpider(scrapy.Spider):
 
     def parse(self, response):
         r = response.css('h1.f00-light.lh-condensed.mb-1::text')
-        print(r)
+        print(r.extract_first().strip())
