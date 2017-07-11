@@ -6,6 +6,7 @@ from trending.items import TrendingItem
 class GithubSpider(scrapy.Spider):
     name = 'github'
     allowed_domains = ['github.com']
+    base_url = 'https://github.com'
     start_urls = [
         'https://github.com/showcases/programming-languages',
         'https://github.com/showcases/web-accessibility',
@@ -29,7 +30,29 @@ class GithubSpider(scrapy.Spider):
         elem_title = response.css(selector_title)
         elem_link = response.css(selector_links)
 
+        trending = []
         items['title'] = elem_title.extract_first().strip()
-        items['trending'] = elem_link.extract()
+        for link in elem_link.extract():
+            project_request = scrapy.Request(
+                self.base_url + link,
+                callback=self.parse_child
+            )
+            project_request.meta['item'] = items
+            yield project_request
 
         yield items
+
+    def parse_child(self, response):
+        item = response.meta['item']
+
+        star = response.css('.social-count.js-social-count::text').extract_first().strip()
+        project_page = []
+        project_page.append(
+            {
+            'url': response.url,
+            'star': star
+            },
+        )
+        item['trending'] = project_page
+        yield item
+
