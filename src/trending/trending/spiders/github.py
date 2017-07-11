@@ -23,11 +23,14 @@ class GithubSpider(scrapy.Spider):
 
     def parse(self, response):
         items = TrendingItem()
-        selector_title = 'h1.f00-light.lh-condensed.mb-1::text'
-        elem_title = response.css(selector_title)
-        items['title'] = elem_title.extract_first().strip()
 
+        selector_title = 'h1.f00-light.lh-condensed.mb-1::text'
         selector_links = '.repo-list-item .mb-1 a::attr(href)'
-        items['trending'] = response.css(selector_links).extract()
+
+        elem_title = response.css(selector_title)
+        elem_link = response.css(selector_links)
+
+        items['title'] = elem_title.extract_first().strip()
+        items['trending'] = elem_link.extract()
 
         yield items
