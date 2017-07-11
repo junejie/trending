@@ -14,7 +14,7 @@ class TrendingPipeline(object):
         return pipeline
 
     def spider_opened(self, spider):
-        file = open('%s_products.json' % spider.name, 'w+b')
+        file = open('%s_trending.json' % spider.name, 'w+b')
         self.files[spider] = file
         self.exporter = JsonItemExporter(file)
         self.exporter.start_exporting()
@@ -26,5 +26,4 @@ class TrendingPipeline(object):
 
     def process_item(self, item, spider):
         self.exporter.export_item(item)
-        print('item::', item)
         return item
