@@ -7,18 +7,20 @@ class GithubSpider(scrapy.Spider):
     name = 'github'
     allowed_domains = ['github.com']
     base_url = 'https://github.com'
+    context = 'showcases'
     start_urls = [
-        'https://github.com/showcases/programming-languages',
-        'https://github.com/showcases/web-accessibility',
-        'https://github.com/showcases/open-source-integrations',
-        'https://github.com/showcases/text-editors',
-        'https://github.com/showcases/devops-tools',
-        'https://github.com/showcases/serverless-architecture',
-        'https://github.com/showcases/productivity-tools',
-        'https://github.com/showcases/projects-that-power-github',
-        'https://github.com/showcases/data-visualization',
-        'https://github.com/showcases/machine-learning',
-        'https://github.com/showcases/nosql-databases'
+        base_url + '/' + context + '/serverless-architecture',
+        base_url + '/' + context + '/programming-languages',
+        base_url + '/' + context + '/web-accessibility',
+        base_url + '/' + context + '/open-source-integrations',
+        base_url + '/' + context + '/text-editors',
+        base_url + '/' + context + '/devops-tools',
+        base_url + '/' + context + '/serverless-architecture',
+        base_url + '/' + context + '/productivity-tools',
+        base_url + '/' + context + '/projects-that-power-github',
+        base_url + '/' + context + '/data-visualization',
+        base_url + '/' + context + '/machine-learning',
+        base_url + '/' + context + '/nosql-databases'
     ]
 
     def parse(self, response):
@@ -35,22 +37,21 @@ class GithubSpider(scrapy.Spider):
         for link in elem_link.extract():
             project_request = scrapy.Request(
                 self.base_url + link,
-                callback=self.parse_child
+                callback=self.parse_child,
+                meta = {'item': items}
             )
-            project_request.meta['item'] = items
             yield project_request
-
         yield items
 
     def parse_child(self, response):
         item = response.meta['item']
-
-        star = response.css('.social-count.js-social-count::text').extract_first().strip()
+        selector_star = '.social-count.js-social-count::text'
+        star = response.css(selector_star).extract_first().strip()
         project_page = []
         project_page.append(
             {
-            'url': response.url,
-            'star': star
+                'url': response.url,
+                'star': star
             },
         )
         item['trending'] = project_page
